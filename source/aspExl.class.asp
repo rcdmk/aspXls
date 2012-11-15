@@ -23,6 +23,7 @@
 
 class aspExl
 	dim lines(), curBoundX, curBoundY
+	dim headers()
 	
 	sub class_initialize()
 		curBoundX = -1
@@ -42,6 +43,8 @@ class aspExl
 			lines(i) = cols
 		next
 		
+		redim preserve headers(newSize)
+		
 		curBoundX = newSize
 	end sub
 	
@@ -58,16 +61,18 @@ class aspExl
 		resizeCols curBoundX
 	end sub
 	
+	public sub setHeader(byval x, byval value)
+		if x > curBoundX then resizeCols(x)
+		
+		headers(x) = value
+	end sub
+	
 	public sub addValue(byval x, byval y, byval value)
 		dim cols
 		
-		if y > curBoundY then
-			resizeRows y
-		end if
+		if y > curBoundY then resizeRows y
 		
-		if x > curBoundX then
-			resizeCols x
-		end if
+		if x > curBoundX then resizeCols x
 		
 		cols = lines(y)
 		cols(x) = value
@@ -76,16 +81,12 @@ class aspExl
 	end sub
 	
 	public sub addRange(byval x, byval y, byval arr)
-		if y > curBoundY then
-			resizeRows y
-		end if
+		if y > curBoundY then resizeRows y
 		
 		dim arrBound
 		arrBound = ubound(arr)
 		
-		if arrBound + x > curBoundX then
-			resizeCols(arrBound + x)
-		end if
+		if arrBound + x > curBoundX then resizeCols(arrBound + x)
 		
 		dim i, cols
 		cols = lines(y)
@@ -98,8 +99,11 @@ class aspExl
 	end sub
 	
 	public function toCSV()
-		dim output, i
+		dim output, headersString, i
 		output = ""
+		headersString = join(headers, ";")
+		
+		if replace(headersString, ";", "") <> "" then output = headersString & vbCrLf
 		
 		for i = 0 to curBoundY
 			output = output & join(lines(i), ";") & vbCrLf
@@ -109,8 +113,11 @@ class aspExl
 	end function
 	
 	public function toHtmlTable()
-		dim output, i
+		dim output, headersString, i
 		output = "<table border=""1"">" & vbCrLf
+		headersString = join(headers, "</th><th>")
+		
+		if replace(headersString, "</th><th>", "") <> "" then output = output & "<tr><th>" & headersString & "</th></tr>" & vbCrLf
 		
 		for i = 0 to curBoundY
 			output = output & "<tr><td>" & join(lines(i), "</td><td>") & "</td></tr>" & vbCrLf

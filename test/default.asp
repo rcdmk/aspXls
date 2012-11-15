@@ -29,20 +29,20 @@
 				set xls = new aspExl
 				
 				' Add a header
-				xls.addValue 0, 0, "id"
-				xls.addValue 1, 0, "description"
-				xls.addValue 2, 0, "createdAt"
+				xls.setHeader 0, "id"
+				xls.setHeader 1, "description"
+				xls.setHeader 2, "createdAt"
 				
 				' Add the first data row
-				xls.addValue 0, 1, 1
-				xls.addValue 1, 1, "obj 1"
-				xls.addValue 2, 1, date()
+				xls.addValue 0, 0, 1
+				xls.addValue 1, 0, "obj 1"
+				xls.addValue 2, 0, date()
 				
 				' Add a bigger imcomplete data row
-				xls.addValue 3, 2, "Comment"
+				xls.addValue 3, 1, "Comment"
 				
 				' Add a range of values at once
-				xls.addRange 0, 3, Array(2, "obj 2", #11/25/2012#)
+				xls.addRange 0, 2, Array(2, "obj 2", #11/25/2012#)
 				
 				%>
 				<h2><code>toCSV()</code></h2>
