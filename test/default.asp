@@ -52,7 +52,7 @@
 				<pre><%= xls.toTabSeparated() %></pre>
 				
 				<h2><code>toHtmlTalbe()</code></h2>
-				<%= xls.toHtmlTable() %>
+				<%= replace(xls.toHtmlTable(), "<table", "<table class=""table table-striped table-bordered""") %>
 				
 				<%	
 				set xls = nothing

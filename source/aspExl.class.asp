@@ -122,16 +122,18 @@ class aspExl
 	
 	public function toHtmlTable()
 		dim output, headersString, i
-		output = "<table border=""1"">" & vbCrLf
+		output = "<table>" & vbCrLf
 		headersString = join(headers, "</th><th>")
 		
-		if replace(headersString, "</th><th>", "") <> "" then output = output & "<tr><th>" & headersString & "</th></tr>" & vbCrLf
+		if replace(headersString, "</th><th>", "") <> "" then output = output & "<thead><tr><th>" & headersString & "</th></tr></thead>" & vbCrLf
+		
+		output = output & "<tbody>"
 		
 		for i = 0 to curBoundY
 			output = output & "<tr><td>" & join(lines(i), "</td><td>") & "</td></tr>" & vbCrLf
 		next
 		
-		output = output & "<table>"
+		output = output & "</tbody><table>"
 		
 		toHtmlTable = output
 	end function
