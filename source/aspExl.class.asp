@@ -1,5 +1,5 @@
 <%
-' Classic ASP CSV creator
+' Classic ASP CSV creator 1.0
 ' By RCDMK <rcdmk@rcdmk.com>
 '
 ' The MIT License (MIT) - http://opensource.org/licenses/MIT
@@ -31,10 +31,24 @@ const ASPXLS_HTML = 3	' HTML table format
 class aspExl
 	dim lines(), curBoundX, curBoundY
 	dim headers()
+	dim m_prettyPrintHTML
 	
+	
+	' A flag for outputing more readable HTML
+	public property get prettyPrintHTML()
+		prettyPrintHTML = m_prettyPrintHTML
+	end property
+	
+	public property let prettyPrintHTML(byval value)
+		m_prettyPrintHTML = value
+	end property
+	
+	
+	' Initialization and destruction
 	sub class_initialize()
 		curBoundX = -1
 		curBoundY = -1
+		m_prettyPrintHTML = false
 	end sub
 	
 	sub class_terminate()
@@ -103,8 +117,7 @@ class aspExl
 	public sub setValue(byval x, byval y, byval value)
 		dim cols
 		
-		if y > curBoundY then resizeRows y
-		
+		if y > curBoundY then resizeRows y		
 		if x > curBoundX then resizeCols x
 		
 		cols = lines(y)
@@ -140,18 +153,48 @@ class aspExl
 		
 		select case format
 			case ASPXLS_HTML:
-				output = "<table>" & vbCrLf
+				output = "<table>"
 				headersString = join(headers, "</th><th>")
 				
-				if replace(headersString, "</th><th>", "") <> "" then output = output & "<thead><tr><th>" & headersString & "</th></tr></thead>" & vbCrLf
+				if replace(headersString, "</th><th>", "") <> "" then output = output & "<thead><tr><th>" & headersString & "</th></tr></thead>"
 				
 				output = output & "<tbody>"
 				
 				for i = 0 to curBoundY
-					output = output & "<tr><td>" & join(lines(i), "</td><td>") & "</td></tr>" & vbCrLf
+					output = output & "<tr><td>" & join(lines(i), "</td><td>") & "</td></tr>"
 				next
 				
-				output = output & "</tbody><table>"
+				output = output & "</tbody></table>"
+				
+				
+				' Prettify HTML for easy reading
+				if m_prettyPrintHTML then
+					dim lineSeparator, indentChar
+					dim regex, breakAndIndent, doubleIndent
+
+					lineSeparator = vbCrLf
+					indentChar = vbTab
+					
+					breakAndIndent = lineSeparator & indentChar
+					doubleIndent = indentChar & indentChar
+					
+					set regex = new regexp
+					regex.global = true
+					
+					regex.pattern = "(</?(?:thead|tbody)>)"
+					output = regex.replace(output, breakAndIndent & "$1")
+					
+					regex.pattern = "(</?tr>)"
+					output = regex.replace(output, breakAndIndent & indentChar & "$1")
+					
+					regex.pattern = "(</table>)"
+					output = regex.replace(output, lineSeparator & "$1")
+					
+					regex.pattern = ">(<(?:th|td)>)"
+					output = regex.replace(output, ">" & breakAndIndent & doubleIndent & "$1")
+					
+					set regex = nothing
+				end if
 				
 			case ASPXLS_CSV:
 				output = toString(";")
@@ -191,9 +234,9 @@ class aspExl
 		dim i
 		set fso = createObject("scripting.filesyStemObject")
 		
-		set file = fso.openTextFile(filePath)
+		set file = fso.createTextFile(filePath, true)
 		
-		file.write outputTo(format)
+		file.writeLine outputTo(format)
 		
 		file.close
 		set file = nothing
