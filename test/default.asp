@@ -34,15 +34,15 @@
 				xls.setHeader 2, "createdAt"
 				
 				' Add the first data row
-				xls.addValue 0, 0, 1
-				xls.addValue 1, 0, "obj 1"
-				xls.addValue 2, 0, date()
+				xls.setValue 0, 0, 1
+				xls.setValue 1, 0, "obj 1"
+				xls.setValue 2, 0, date()
 				
 				' Add a bigger imcomplete data row
-				xls.addValue 3, 1, "Comment"
+				xls.setValue 3, 1, "Comment"
 				
 				' Add a range of values at once
-				xls.addRange 0, 2, Array(2, "obj 2", #11/25/2012#)
+				xls.setRange 0, 2, Array(2, "obj 2", #11/25/2012#)
 				
 				%>
 				<h2><code>toCSV()</code></h2>

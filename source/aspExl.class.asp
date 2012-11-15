@@ -21,6 +21,13 @@
 ' OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+' Format constants
+const ASPXLS_CSV = 1	' CSV format
+const ASPXLS_TSV = 2	' Tab separeted format
+const ASPXLS_HTML = 3	' HTML table format
+
+
+' Main class
 class aspExl
 	dim lines(), curBoundX, curBoundY
 	dim headers()
@@ -31,9 +38,13 @@ class aspExl
 	end sub
 	
 	sub class_terminate()
+		' Destroy all elements of the arrays
 		redim lines(-1)
+		redim headers(-1)
 	end sub
 	
+	
+	' Resizes the columns and header arrays to fit a new size
 	private sub resizeCols(byval newSize)
 		dim i, cols
 		
@@ -48,6 +59,8 @@ class aspExl
 		curBoundX = newSize
 	end sub
 	
+	
+	' Resizes the lines array to fit a new size
 	private sub resizeRows(byval newSize)
 		dim i
 		redim preserve lines(newSize)
@@ -61,13 +74,33 @@ class aspExl
 		resizeCols curBoundX
 	end sub
 	
+	
+	' Contatenates and return the values in a string using a separator string
+	private function toString(byval separator)
+		dim output, headersString, i
+		output = ""
+		headersString = join(headers, separator)
+		
+		if replace(headersString, separator, "") <> "" then output = headersString & vbCrLf
+		
+		for i = 0 to curBoundY
+			output = output & join(lines(i), separator) & vbCrLf
+		next
+		
+		toString = output
+	end function
+	
+	
+	' Sets a header value
 	public sub setHeader(byval x, byval value)
 		if x > curBoundX then resizeCols(x)
 		
 		headers(x) = value
 	end sub
 	
-	public sub addValue(byval x, byval y, byval value)
+	
+	' Sets the value of a cell
+	public sub setValue(byval x, byval y, byval value)
 		dim cols
 		
 		if y > curBoundY then resizeRows y
@@ -80,7 +113,9 @@ class aspExl
 		lines(y) = cols
 	end sub
 	
-	public sub addRange(byval x, byval y, byval arr)
+	
+	' Sets the values of a range of cells starting at the specified coordinates
+	public sub setRange(byval x, byval y, byval arr)
 		if y > curBoundY then resizeRows y
 		
 		dim arrBound
@@ -98,54 +133,67 @@ class aspExl
 		lines(y) = cols
 	end sub
 	
-	private function toString(byval separator)
+	
+	' Returns a string formatted output of the data
+	public function outputTo(byval format)
 		dim output, headersString, i
-		output = ""
-		headersString = join(headers, separator)
 		
-		if replace(headersString, separator, "") <> "" then output = headersString & vbCrLf
+		select case format
+			case ASPXLS_HTML:
+				output = "<table>" & vbCrLf
+				headersString = join(headers, "</th><th>")
+				
+				if replace(headersString, "</th><th>", "") <> "" then output = output & "<thead><tr><th>" & headersString & "</th></tr></thead>" & vbCrLf
+				
+				output = output & "<tbody>"
+				
+				for i = 0 to curBoundY
+					output = output & "<tr><td>" & join(lines(i), "</td><td>") & "</td></tr>" & vbCrLf
+				next
+				
+				output = output & "</tbody><table>"
+				
+			case ASPXLS_CSV:
+				output = toString(";")
+				
+			case ASPXLS_TSV:
+				output = toString(vbTab)
+			
+			case default:
+				output = ""
+		end select
 		
-		for i = 0 to curBoundY
-			output = output & join(lines(i), separator) & vbCrLf
-		next
-		
-		toString = output
+		outputTo = output
 	end function
 	
+	
+	' Returns a semi-colon separated string for each row
 	public function toCSV()
-		toCSV = toString(";")
+		toCSV = outputTo(ASPXLS_CSV)
 	end function
 	
+	
+	' Returns a TAB separated string for each row
 	public function toTabSeparated()
-		toTabSeparated = toString(vbTab)
+		toTabSeparated = outputTo(ASPXLS_TSV)
 	end function
 	
+	
+	' Returns a HTML table formatted string
 	public function toHtmlTable()
-		dim output, headersString, i
-		output = "<table>" & vbCrLf
-		headersString = join(headers, "</th><th>")
-		
-		if replace(headersString, "</th><th>", "") <> "" then output = output & "<thead><tr><th>" & headersString & "</th></tr></thead>" & vbCrLf
-		
-		output = output & "<tbody>"
-		
-		for i = 0 to curBoundY
-			output = output & "<tr><td>" & join(lines(i), "</td><td>") & "</td></tr>" & vbCrLf
-		next
-		
-		output = output & "</tbody><table>"
-		
-		toHtmlTable = output
+		toHtmlTable = outputTo(ASPXLS_HTML)
 	end function
 	
-	public sub writeToFile(byval filePath)
+	
+	' Writes a string fomatted output to a file
+	public sub writeToFile(byval filePath, byval format)
 		dim fso, file
 		dim i
 		set fso = createObject("scripting.filesyStemObject")
 		
 		set file = fso.openTextFile(filePath)
 		
-		file.write toString()
+		file.write outputTo(format)
 		
 		file.close
 		set file = nothing
