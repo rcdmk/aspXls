@@ -97,7 +97,7 @@ class aspExl
 		lines(y) = cols
 	end sub
 	
-	public function toString()
+	public function toCSV()
 		dim output, i
 		output = ""
 		
@@ -105,7 +105,7 @@ class aspExl
 			output = output & join(lines(i), ";") & vbCrLf
 		next
 		
-		toString = output
+		toCSV = output
 	end function
 	
 	public function toHtmlTable()
