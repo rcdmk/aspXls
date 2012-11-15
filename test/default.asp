@@ -16,7 +16,7 @@ xls.addValue 2, 1, date()
 xls.addValue 3, 2, "Comment"
 
 ' Add a range of values at once
-xls.addRange 3, Array(2, "obj 2", #25/11/2012#)
+xls.addRange 0, 3, Array(2, "obj 2", #25/11/2012#)
 
 response.write "<pre>" & xls.toString() & "<pre>"
 

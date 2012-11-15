@@ -38,18 +38,18 @@ class aspExl
 		
 		for i = 0 to curBoundY
 			cols = lines(i)
-			redim preserve cols(newSize + 1)
+			redim preserve cols(newSize)
 			lines(i) = cols
 		next
 		
-		curBoundX = x
+		curBoundX = newSize
 	end sub
 	
 	private sub resizeRows(byval newSize)
 		dim i
 		redim preserve lines(newSize)
 		
-		for i = curBoundY to newSize
+		for i = curBoundY + 1 to newSize
 			if i >= 0 then lines(i) = Array()
 		next
 		
@@ -75,22 +75,26 @@ class aspExl
 		lines(y) = cols
 	end sub
 	
-	public sub addRange(byval y, byval arr)
+	public sub addRange(byval x, byval y, byval arr)
 		if y > curBoundY then
-			curBoundY = y
-			redim preserve lines(y + 1)
-			redim cols(curBoundX + 1)
+			resizeRows y
 		end if
 		
 		dim arrBound
 		arrBound = ubound(arr)
 		
-		if arrBound < curBoundX then
-			redim preserve arr(curBoundX)
-		elseif arrBound > curBoundX then
-			
+		if arrBound + x > curBoundX then
+			resizeCols(arrBound + x)
 		end if
-		lines(y) = arr
+		
+		dim i, cols
+		cols = lines(y)
+		
+		for i = 0 to arrBound
+			cols(x + i) = arr(i)
+		next
+		
+		lines(y) = cols
 	end sub
 	
 	public function toString()
