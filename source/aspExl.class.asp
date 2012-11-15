@@ -98,18 +98,26 @@ class aspExl
 		lines(y) = cols
 	end sub
 	
-	public function toCSV()
+	private function toString(byval separator)
 		dim output, headersString, i
 		output = ""
-		headersString = join(headers, ";")
+		headersString = join(headers, separator)
 		
-		if replace(headersString, ";", "") <> "" then output = headersString & vbCrLf
+		if replace(headersString, separator, "") <> "" then output = headersString & vbCrLf
 		
 		for i = 0 to curBoundY
-			output = output & join(lines(i), ";") & vbCrLf
+			output = output & join(lines(i), separator) & vbCrLf
 		next
 		
-		toCSV = output
+		toString = output
+	end function
+	
+	public function toCSV()
+		toCSV = toString(";")
+	end function
+	
+	public function toTabSeparated()
+		toTabSeparated = toString(vbTab)
 	end function
 	
 	public function toHtmlTable()

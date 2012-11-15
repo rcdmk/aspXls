@@ -48,6 +48,9 @@
 				<h2><code>toCSV()</code></h2>
 				<pre><%= xls.toCSV() %></pre>
 				
+				<h2><code>toTabSeparated()</code></h2>
+				<pre><%= xls.toTabSeparated() %></pre>
+				
 				<h2><code>toHtmlTalbe()</code></h2>
 				<%= xls.toHtmlTable() %>
 				
